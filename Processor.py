@@ -1,22 +1,13 @@
-from __future__ import division #for float division
 
-import os;
-import collections
-
-import openpyxl
-import pprint
 
 import nltk
+from nltk import word_tokenize
+from nltk.model import count_ngrams #for training the model, returns an instance of the 'NgramCounter' class
+from nltk.model import LaplaceNgramModel
+from nltk.model import LidstoneNgramModel
 
-import types
+from nltk.model import build_vocabulary
 
-from collections import Counter
-
-from nltk.corpus import stopwords
-
-from stemming.porter2 import stem #Python's Porter2 implementation
-
-from openpyxl.styles import Font, Style
 
 class Processor(object):
     
@@ -39,7 +30,98 @@ class Processor(object):
 if __name__ == '__main__':
     processor = Processor();
     
+    lbTrain = open('LB-Train.txt').read()
+    mbTrain = open('MB-train.txt').read()
     
+    
+    # print "\n\nLB Train is "+ str(len(lbTrain)) +" :\n\n\n"
+    # print lbTrain
+    # print "\n\n\n"
+    
+    lbTraintokens = word_tokenize(lbTrain)
+    mbTraintokens = word_tokenize(mbTrain)
+    
+        
+    # print "\n\nLB lbTraintokens "+ str(len(lbTraintokens)) +"  is:\n\n\n"
+ #    print lbTraintokens
+ #    print "\n\n\n"
+    
+    lbTrainwords = [w.lower() for w in lbTraintokens]
+    mbTrainwords = [w.lower() for w in mbTraintokens]
+    
+    
+    print "\n\nLB lbTrainwords "+ str(len(lbTrainwords)) 
+    print "\n\nMB mbTrainwords "+ str(len(mbTrainwords)) 
+    
+#     print lbTrainwords
+#     print "\n\n\n"
+    
+    
+    lbTrainvocab = build_vocabulary(2, lbTrainwords)
+    mbTrainvocab = build_vocabulary(2, mbTrainwords)
+    
+    # print "\n\nLB lbTrainvocab.keys "+ str(len(lbTrainvocab)) +"  is:\n\n\n"
+#     print lbTrainvocab.keys()
+#     print "\n\n\n the vocab is"
+#     print lbTrainvocab
+#     print "\n\n\n"
+    
+    
+    LB_bigram_counts = count_ngrams(2, lbTrainvocab, lbTrainwords)
+    MB_bigram_counts = count_ngrams(2, mbTrainvocab, mbTrainwords)
+    
+    # print "\n\nLB LB_bigram_counts is:\n\n\n"
+#     print LB_bigram_counts
+#     print "\n\n\n"
+    
+    LB_Laplace_bigram_model=LaplaceNgramModel(LB_bigram_counts)
+    MB_Laplace_bigram_model=LaplaceNgramModel(MB_bigram_counts)
+    
+    '''
+    print("Building language model...")
+    est = lambda fdist, bins: LaplaceProbDist(fdist)
+    LB_bigram_model = NgramModel(2, lbTrain1words, estimator=est)
+    '''
+    #LB_bigram_model = LaplaceNgram(LB_bigram_counts)
+    
+    
+    
+    #LB_model = NgramModel(2, lbTrain1, True, False, lambda f, b:LaplaceProbDist(f))
+    
+    
+    lbTest = open('LB-Test.txt').read()
+    mbTest = open('MB-test.txt').read()
+    
+    # print "\n\nLB lbTest is:\n\n\n"
+#     print lbTest
+#     print "\n\n\n"
+        
+    lbTesttokens = word_tokenize(lbTest)    
+    lbTestwords = [w.lower() for w in lbTesttokens]
+    
+    mbTesttokens = word_tokenize(mbTest)    
+    mbTestwords = [w.lower() for w in mbTesttokens]
+        
+    print "\n\nlbTest perplexity in LB_Laplace_bigram_model is: "
+    print LB_Laplace_bigram_model.perplexity(lbTestwords)
+    
+    print "\n\nlbTrainwords perplexity in LB_Laplace_bigram_model is: "
+    print LB_Laplace_bigram_model.perplexity(lbTrainwords)
+    
+    print "\n\nmbTrainwords perplexity in LB_Laplace_bigram_model is: "
+    print LB_Laplace_bigram_model.perplexity(mbTrainwords)
+    
+    print "\n\nmbTest perplexity in MB_Laplace_bigram_model is: "
+    print MB_Laplace_bigram_model.perplexity(mbTestwords)
+    
+    print "\n\nmbTrainwords perplexity in MB_Laplace_bigram_model is: "
+    print MB_Laplace_bigram_model.perplexity(mbTrainwords)
+    
+    print "\n\nlbTrainwords perplexity in MB_Laplace_bigram_model is: "
+    print MB_Laplace_bigram_model.perplexity(lbTrainwords)
+    print "\n\n\n"
+    
+
     
     '''
     print '\nCreate session and final scripts workbook\n'
